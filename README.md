@@ -1,4 +1,4 @@
 # starter
 Starter of web projects.
 
-A little boilerplate including SCSS-styles and Gulp.
+A little boilerplate including SCSS-styles and Gulp support.
