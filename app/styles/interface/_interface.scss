@@ -1,0 +1,17 @@
+main {
+	overflow: hidden;
+}
+
+.pagewrap {
+	background-color: #405d73;
+	overflow: hidden;
+
+	&--innerpage {
+		background-color: #fff;
+	}
+}
+
+.center {
+	width: 1170px;
+	margin: 0 auto;
+}
