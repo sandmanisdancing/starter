@@ -131,11 +131,15 @@ var scriptsArray = [
   // Note: Since we are not using useref in the scripts build pipeline,
   //       you need to explicitly list your scripts here in the right order
   //       to be correctly concatenated
-  './app/scripts/slick.min.js',
-  './app/scripts/jquery.bPopup.js',
-  './app/scripts/chosen.jquery.js',
-  './app/scripts/jquery.fancybox.pack.js',
-  './app/scripts/jquery.dotdotdot.min.js',
+
+  // './app/scripts/slick.min.js',
+  // './app/scripts/jquery.bPopup.js',
+  // './app/scripts/chosen.jquery.js',
+  // './app/scripts/jquery.fancybox.pack.js',
+  // './app/scripts/jquery.dotdotdot.min.js',
+  // './app/scripts/jquery.mCustomScrollbar.concat.min.js',
+  // './app/scripts/stickytableheaders.min.js',
+  // './app/scripts/jquery.tools.min.tabs.js',
   './app/scripts/main.js'
 ];
 
