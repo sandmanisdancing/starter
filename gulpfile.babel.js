@@ -56,7 +56,7 @@ gulp.task('clearCache', () => {
 // Sprite images
 gulp.task('sprite', () => {
   var spriteData =
-  gulp.src('app/images/sprite/*.*') // путь, откуда берем картинки для спрайта
+  gulp.src('app/images/sprite/*.*') // raw images for sprite path
   .pipe($.spritesmith({
     imgName: 'sprite.png',
     cssName: '_sprite.scss',
@@ -66,8 +66,8 @@ gulp.task('sprite', () => {
     algorithm: 'binary-tree'
   }));
 
-  spriteData.img.pipe(gulp.dest('app/images/')); // путь, куда сохраняем картинку
-  spriteData.css.pipe(gulp.dest('app/styles/')); // путь, куда сохраняем стили
+  spriteData.img.pipe(gulp.dest('app/images/')); // path for compiled sprite image
+  spriteData.css.pipe(gulp.dest('app/styles/')); // path for compiled sprite variables
 });
 
 // Copy fonts to dist
@@ -127,23 +127,33 @@ gulp.task('styles', () => {
 // Concatenate and minify JavaScript. Optionally transpiles ES2015 code to ES5.
 // to enables ES2015 support remove the line `"only": "gulpfile.babel.js",` in the
 // `.babelrc` file.
+var scriptsArray = [
+  // Note: Since we are not using useref in the scripts build pipeline,
+  //       you need to explicitly list your scripts here in the right order
+  //       to be correctly concatenated
+  './app/scripts/slick.min.js',
+  './app/scripts/jquery.bPopup.js',
+  './app/scripts/chosen.jquery.js',
+  './app/scripts/jquery.fancybox.pack.js',
+  './app/scripts/jquery.dotdotdot.min.js',
+  './app/scripts/main.js'
+];
+
 gulp.task('scripts', () => {
-    gulp.src([
-      // Note: Since we are not using useref in the scripts build pipeline,
-      //       you need to explicitly list your scripts here in the right order
-      //       to be correctly concatenated
-      './app/scripts/slick.min.js',
-      './app/scripts/jquery.bPopup.js',
-      './app/scripts/chosen.jquery.js',
-      './app/scripts/jquery.fancybox.pack.js',
-      './app/scripts/jquery.dotdotdot.min.js',
-      './app/scripts/main.js'
-    ])
+    gulp.src(scriptsArray)
       .pipe($.concat('main.min.js'))
-      //.pipe($.uglify({preserveComments: 'some'}))
-      // Output files
-      //.pipe($.size({title: 'scripts'}))
-      //.pipe($.sourcemaps.write('.'))
+      .pipe($.size({title: 'scripts'}))
+      .pipe($.sourcemaps.write('.'))
+      .pipe(gulp.dest('dist/scripts'))
+    }
+);
+
+gulp.task('scriptsProd', () => {
+    gulp.src(scriptsArray)
+      .pipe($.concat('main.min.js'))
+      .pipe($.uglify({preserveComments: 'some'}))
+      .pipe($.size({title: 'scripts'}))
+      .pipe($.sourcemaps.write('.'))
       .pipe(gulp.dest('dist/scripts'))
     }
 );
@@ -177,7 +187,7 @@ gulp.task('cleanImages', ['images'], () => {
 // Watch files for changes & reload
 gulp.task('serve', ['default'], () => {
   browserSync.init({
-    notify: false,
+    notify: true,
     server: ['.tmp', 'dist'],
     reloadDelay: 500,
     port: 3000
