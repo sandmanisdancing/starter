@@ -33,10 +33,10 @@ import bs from 'browser-sync';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import pkg from './package.json';
 
-
 const $ = gulpLoadPlugins();
 const browserSync = bs.create();
 const reload = browserSync.reload;
+
 
 // Optimize images
 gulp.task('images', () =>
@@ -46,10 +46,22 @@ gulp.task('images', () =>
       interlaced: true
     })))
     .pipe(gulp.dest('dist/images'))
+    .pipe(browserSync.stream())
     .pipe($.size({title: 'images'}))
 );
 
-gulp.task('clearCache', () => {
+// Convert images to WebP
+gulp.task('webp', () => {
+  return gulp.src(['app/images/**/*', '!app/images/sprite/*'])
+    .pipe($.webp({
+      quality: 85
+    }))
+    .pipe(gulp.dest('dist/images'))
+    .pipe($.size({title: 'webp'}));
+});
+
+// Clean cache
+gulp.task('cleanCache', () => {
   return $.cache.clearAll();
 });
 
@@ -91,19 +103,6 @@ gulp.task('copy', ['fonts'], () =>
 
 // Compile and automatically prefix stylesheets
 gulp.task('styles', () => {
-  const AUTOPREFIXER_BROWSERS = [
-    'ie >= 10',
-    'ie_mob >= 10',
-    'ff >= 30',
-    'chrome >= 34',
-    'safari >= 7',
-    'opera >= 23',
-    'ios >= 7',
-    'android >= 4.4',
-    'bb >= 10'
-  ];
-
-  // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
     'app/styles/**/*.scss',
     'app/styles/**/*.css'
@@ -113,7 +112,12 @@ gulp.task('styles', () => {
       precision: 10,
       includePaths: require('node-bourbon').includePaths
     }).on('error', $.sass.logError))
-    .pipe($.autoprefixer(AUTOPREFIXER_BROWSERS))
+    .pipe($.autoprefixer({
+      browsers: '> 5%'
+    }))
+    .pipe($.rename({
+      suffix: '.min'
+    }))
     .pipe(gulp.dest('.tmp/styles'))
 
     .pipe($.if('*.css', $.cssnano({
@@ -121,7 +125,7 @@ gulp.task('styles', () => {
     })))
     .pipe($.size({title: 'styles'}))
     .pipe(gulp.dest('dist/styles'))
-    .pipe(browserSync.stream());
+    .pipe(browserSync.stream({match: '**/*.css'}));
 });
 
 // Concatenate and minify JavaScript. Optionally transpiles ES2015 code to ES5.
@@ -138,8 +142,11 @@ var scriptsArray = [
   // './app/scripts/jquery.fancybox.pack.js',
   // './app/scripts/jquery.dotdotdot.min.js',
   // './app/scripts/jquery.mCustomScrollbar.concat.min.js',
+  // './app/scripts/jquery.mousewheel.min.js',
   // './app/scripts/stickytableheaders.min.js',
   // './app/scripts/jquery.tools.min.tabs.js',
+  // './app/scripts/jquery.masked.input.js',
+  './app/scripts/modernizr-webp.js',
   './app/scripts/main.js'
 ];
 
@@ -166,14 +173,6 @@ gulp.task('scriptsProd', () => {
 gulp.task('html', () => {
   return gulp.src('app/**/*.html')
     .pipe($.useref({searchPath: '{.tmp,app}'}))
-    // Remove any unused CSS
-    .pipe($.if('*.css', $.uncss({
-      html: [
-        'app/index.html'
-      ],
-      // CSS Selectors for UnCSS to ignore
-      ignore: []
-    })))
 
     // Output files
     .pipe($.if('*.html', $.size({title: 'html', showFiles: true})))
@@ -184,7 +183,7 @@ gulp.task('html', () => {
 gulp.task('clean', cb => del(['.tmp', 'dist/*', '!dist/.git'], {dot: true}));
 
 // Clean images directory
-gulp.task('cleanImages', ['images'], () => {
+gulp.task('cleanImages', ['images', 'webp'], () => {
   del(['dist/images/sprite/**'], {dot: true})
 });
 
@@ -193,25 +192,21 @@ gulp.task('serve', ['default'], () => {
   browserSync.init({
     notify: true,
     server: ['.tmp', 'dist'],
-    reloadDelay: 500,
-    port: 3000
+    reloadDelay: 800,
+    port: 3000,
+    ghostMode: false
   });
 
   gulp.watch(['app/**/*.html'], ['html', reload]);
   gulp.watch(['app/styles/**/*.scss'], ['styles']);
   gulp.watch(['app/scripts/**/*.js'], ['scripts', reload]);
-  gulp.watch(['app/images/**/*.{jpg,png}', '!app/images/sprite/*'], ['cleanImages', reload]);
+  gulp.watch(['app/images/**/*.{jpg,png}', '!app/images/sprite/*'], ['cleanImages']);
 });
 
 // Build production files, the default task
 gulp.task('default', ['clean'], cb =>
   runSequence(
-    ['clearCache', 'sprite', 'html', 'scripts', 'cleanImages', 'styles', 'copy'],
+    ['cleanCache', 'sprite', 'html', 'scripts', 'cleanImages', 'styles', 'copy'],
     cb
   )
 );
-
-
-// Load custom tasks from the `tasks` directory
-// Run: `npm install --save-dev require-dir` from the command-line
-// try { require('require-dir')('tasks'); } catch (err) { console.error(err); }
