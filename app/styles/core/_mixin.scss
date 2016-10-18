@@ -1,3 +1,47 @@
+@mixin responsive($max-width) {
+	@media (max-width: #{$max-width}+ 'px') {
+		@content;
+	}
+}
+
+@mixin tablet-l {
+	@include responsive($tabl) {
+		@content;
+	}
+}
+
+@mixin tablet-p {
+	@include responsive($tabp) {
+		@content;
+	}
+}
+
+@mixin mobile {
+	@include responsive($mob) {
+		@content;
+	}
+}
+
+@mixin image-png($image-name) {
+	@at-root .no-webp & {
+		background-image: url(../images/#{$image-name}.png);
+	}
+
+	@at-root .webp & {
+		background-image: url(../images/#{$image-name}.webp);
+	}
+}
+
+@mixin image-jpg($image-name) {
+	@at-root .no-webp & {
+		background-image: url(../images/#{$image-name}.jpg);
+	}
+
+	@at-root .webp & {
+		background-image: url(../images/#{$image-name}.webp);
+	}
+}
+
 @mixin vam {
 	content: '';
 	display: inline-block;
@@ -13,6 +57,14 @@
 	top: 0;
 	bottom: 0;
 	margin: auto;
+}
+
+@mixin fullpseudo {
+	position: absolute;
+	content: '';
+	left: 0;
+	top: 0;
+	@include size(100%);
 }
 
 @mixin forsprite($left:0,$top:0) {
@@ -41,9 +93,42 @@
   background-image: url(../images/#{$sprite-image});
 }
 
+@mixin spriteImage-webp($sprite) {
+  $sprite-image: nth($sprite, 9);
+  background-image: url(../images/sprite.webp);
+}
+
+@mixin sprite-webp-mixin($sprite) {
+	@include spriteImage-webp($sprite)
+	@include spritePosition($sprite)
+	@include spriteWidth($sprite)
+	@include spriteHeight($sprite)
+}
+
 @mixin sprite($sprite) {
-    @include spriteImage($sprite)
-    @include spritePosition($sprite)
-    @include spriteWidth($sprite)
-    @include spriteHeight($sprite)
+	@at-root .no-webp & {
+		@include spriteImage($sprite);
+		@include spritePosition($sprite);
+		@include spriteWidth($sprite);
+		@include spriteHeight($sprite);
+	}
+
+	@at-root .webp & {
+		@include sprite-webp-mixin($sprite);
+	}
+}
+
+@mixin sprite-in($sprite, $left, $top) {
+	@include forsprite($left, $top);
+
+	@at-root .no-webp & {
+		@include spriteImage($sprite);
+		@include spritePosition($sprite);
+		@include spriteWidth($sprite);
+		@include spriteHeight($sprite);
+	}
+
+	@at-root .webp & {
+		@include sprite-webp-mixin($sprite);
+	}
 }

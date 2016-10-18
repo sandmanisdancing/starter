@@ -24,14 +24,14 @@
 // You can read more about the new JavaScript features here:
 // https://babeljs.io/docs/learn-es2015/
 
-import fs from 'fs';
-import path from 'path';
-import gulp from 'gulp';
-import del from 'del';
-import runSequence from 'run-sequence';
-import bs from 'browser-sync';
-import gulpLoadPlugins from 'gulp-load-plugins';
-import pkg from './package.json';
+const fs = require('fs');
+const path = require('path');
+const gulp = require('gulp');
+const del = require('del');
+const runSequence = require('run-sequence');
+const bs = require('browser-sync');
+const gulpLoadPlugins = require('gulp-load-plugins');
+const pkg = require('./package.json');
 
 const $ = gulpLoadPlugins();
 const browserSync = bs.create();
@@ -112,9 +112,6 @@ gulp.task('styles', () => {
       precision: 10,
       includePaths: require('node-bourbon').includePaths
     }).on('error', $.sass.logError))
-    .pipe($.autoprefixer({
-      browsers: '> 5%'
-    }))
     .pipe($.rename({
       suffix: '.min'
     }))
@@ -123,6 +120,9 @@ gulp.task('styles', () => {
     .pipe($.if('*.css', $.cssnano({
       discardUnused: false
     })))
+    .pipe($.autoprefixer({
+      browsers: "last 4 versions"
+    }))
     .pipe($.size({title: 'styles'}))
     .pipe(gulp.dest('dist/styles'))
     .pipe(browserSync.stream({match: '**/*.css'}));
@@ -136,16 +136,17 @@ var scriptsArray = [
   //       you need to explicitly list your scripts here in the right order
   //       to be correctly concatenated
 
-  // './app/scripts/slick.min.js',
+  './app/scripts/slick.min.js',
   // './app/scripts/jquery.bPopup.js',
-  // './app/scripts/chosen.jquery.js',
+  './app/scripts/chosen.jquery.js',
   // './app/scripts/jquery.fancybox.pack.js',
   // './app/scripts/jquery.dotdotdot.min.js',
-  // './app/scripts/jquery.mCustomScrollbar.concat.min.js',
+  './app/scripts/jquery.mCustomScrollbar.concat.min.js',
   // './app/scripts/jquery.mousewheel.min.js',
   // './app/scripts/stickytableheaders.min.js',
-  // './app/scripts/jquery.tools.min.tabs.js',
-  // './app/scripts/jquery.masked.input.js',
+  './app/scripts/jquery.chained.min.js',
+  './app/scripts/jquery.tools.min.tabs.js',
+  './app/scripts/jquery.masked.input.js',
   './app/scripts/modernizr-webp.js',
   './app/scripts/main.js'
 ];
